@@ -358,9 +358,9 @@ class DotnetCoreInstaller {
                 ignoreReturnCode: true,
                 env: process.env
             };
-            const { exitCode, stdout } = yield exec.getExecOutput(`"${scriptPath}"`, scriptArguments, getExecOutputOptions);
+            const { exitCode, stderr } = yield exec.getExecOutput(`"${scriptPath}"`, scriptArguments, getExecOutputOptions);
             if (exitCode) {
-                throw new Error(`Failed to install dotnet ${exitCode}. ${stdout}`);
+                throw new Error(`Dotnet installation failed with exit code: ${exitCode}. ${stderr}`);
             }
             return this.outputDotnetVersion(dotnetVersion.value);
         });
