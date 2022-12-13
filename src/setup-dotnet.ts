@@ -100,7 +100,7 @@ export async function run() {
 }
 
 function getVersionFromGlobalJson(globalJsonPath: string): string {
-  let version: string = '';
+  let version = '';
   const globalJson = JSON.parse(
     // .trim() is necessary to strip BOM https://github.com/nodejs/node/issues/20649
     fs.readFileSync(globalJsonPath, {encoding: 'utf8'}).trim()

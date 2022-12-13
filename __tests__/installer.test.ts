@@ -91,7 +91,7 @@ describe('DotnetCoreInstaller tests', () => {
 
   it('Acquires generic version of dotnet if no matching version is installed', async () => {
     await getDotnet('3.1');
-    var directory = fs
+    const directory = fs
       .readdirSync(path.join(toolDir, 'sdk'))
       .filter(fn => fn.startsWith('3.1.'));
     expect(directory.length > 0).toBe(true);
@@ -109,9 +109,7 @@ describe('DotnetCoreInstaller tests', () => {
 
   it('Returns string with installed SDK version', async () => {
     const version = '3.1.120';
-    let installedVersion: string;
-
-    installedVersion = await getDotnet(version);
+    const installedVersion = await getDotnet(version);
 
     expect(installedVersion).toBe('3.1.120');
   }, 600000);
@@ -143,7 +141,7 @@ describe('DotnetCoreInstaller tests', () => {
   }, 30000);
 
   it('Uses an up to date powershell download script', async () => {
-    var httpCallbackClient = new hc.HttpClient('setup-dotnet-test', [], {
+    const httpCallbackClient = new hc.HttpClient('setup-dotnet-test', [], {
       allowRetries: true,
       maxRetries: 3
     });
@@ -276,10 +274,7 @@ function normalizeFileContents(contents: string): string {
     .replace(new RegExp('\r', 'g'), '\n');
 }
 
-async function getDotnet(
-  version: string,
-  quality: string = ''
-): Promise<string> {
+async function getDotnet(version: string, quality = ''): Promise<string> {
   const dotnetInstaller = new installer.DotnetCoreInstaller(
     version,
     quality as QualityOptions
