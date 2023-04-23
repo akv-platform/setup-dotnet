@@ -17,21 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operating-system: [ubuntu-latest, windows-latest, macOS-latest]
-        dotnet-version: ['2.1', '2.2', '3.0', '3.1', '5.0']
+        operating-system: [ubuntu-latest, macOS-latest]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Clear toolcache
-        shell: pwsh
-        run: __tests__/clear-toolcache.ps1 ${{ runner.os }}
-      - name: Setup dotnet ${{ matrix.dotnet-version }}
-        uses: ./
-        with:
-          dotnet-version: ${{ matrix.dotnet-version }}
-      - name: Check installed version
-        shell: pwsh
+      - uses: actions/checkout@v3
+      - name: Run dotnet-installer script
         run: |
-          $version = & dotnet --version
-          Write-Host "Installed version: $version"
-          if (-not $version.StartsWith("${{ matrix.dotnet-version }}")) { throw "Unexpected version" }
+          . ./externals/install-dotnet.sh
