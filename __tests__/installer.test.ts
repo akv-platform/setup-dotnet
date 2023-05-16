@@ -149,23 +149,17 @@ describe('installer tests', () => {
         expect(getExecOutputSpy.mock.calls.length).toEqual(2);
 
         expect(getExecOutputSpy.mock.calls[0][1]?.join(' ')).toContain(
-          IS_WINDOWS
-            ? '-Channel LTS'
-            : '--channel LTS'
-        )
+          IS_WINDOWS ? '-Channel LTS' : '--channel LTS'
+        );
 
         expect(getExecOutputSpy.mock.calls[0][1]?.join(' ')).toContain(
-          IS_WINDOWS
-            ? '-Runtime dotnet'
-            : '--runtime dotnet'
-        )
+          IS_WINDOWS ? '-Runtime dotnet' : '--runtime dotnet'
+        );
 
         expect(getExecOutputSpy.mock.calls[1][1]?.join(' ')).toContain(
-          IS_WINDOWS
-            ? `-Version ${inputVersion}`
-            : `--version ${inputVersion}`
-        )
-      })
+          IS_WINDOWS ? `-Version ${inputVersion}` : `--version ${inputVersion}`
+        );
+      });
 
       each(['6', '6.0', '6.0.x', '6.0.*', '6.0.X']).test(
         `should supply 'quality' argument to the installation script if quality input is set and version (%s) is not in A.B.C syntax`,
