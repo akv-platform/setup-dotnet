@@ -79,7 +79,7 @@ describe('installer tests', () => {
         await dotnetInstaller.installDotnet();
 
         const scriptArguments = (
-          getExecOutputSpy.mock.calls[0][1] as string[]
+          getExecOutputSpy.mock.calls[1][1] as string[]
         ).join(' ');
         const expectedArgument = IS_WINDOWS
           ? `-Version ${inputVersion}`
@@ -130,6 +130,43 @@ describe('installer tests', () => {
         );
       });
 
+      it('should call install script 2 times: for the runtime and for the sdk', async () => {
+        const inputVersion = '6.0.300';
+        const inputQuality = '' as QualityOptions;
+
+        getExecOutputSpy.mockImplementation(() => {
+          return Promise.resolve({exitCode: 0, stdout: '', stderr: ''});
+        });
+        maxSatisfyingSpy.mockImplementation(() => inputVersion);
+
+        const dotnetInstaller = new installer.DotnetCoreInstaller(
+          inputVersion,
+          inputQuality
+        );
+
+        await dotnetInstaller.installDotnet();
+
+        expect(getExecOutputSpy.mock.calls.length).toEqual(2);
+
+        expect(getExecOutputSpy.mock.calls[0][1]?.join(' ')).toContain(
+          IS_WINDOWS
+            ? '-Channel LTS'
+            : '--channel LTS'
+        )
+
+        expect(getExecOutputSpy.mock.calls[0][1]?.join(' ')).toContain(
+          IS_WINDOWS
+            ? '-Runtime dotnet'
+            : '--runtime dotnet'
+        )
+
+        expect(getExecOutputSpy.mock.calls[1][1]?.join(' ')).toContain(
+          IS_WINDOWS
+            ? `-Version ${inputVersion}`
+            : `--version ${inputVersion}`
+        )
+      })
+
       each(['6', '6.0', '6.0.x', '6.0.*', '6.0.X']).test(
         `should supply 'quality' argument to the installation script if quality input is set and version (%s) is not in A.B.C syntax`,
         async inputVersion => {
@@ -152,7 +189,7 @@ describe('installer tests', () => {
           await dotnetInstaller.installDotnet();
 
           const scriptArguments = (
-            getExecOutputSpy.mock.calls[0][1] as string[]
+            getExecOutputSpy.mock.calls[1][1] as string[]
           ).join(' ');
           const expectedArgument = IS_WINDOWS
             ? `-Quality ${inputQuality}`
@@ -184,7 +221,7 @@ describe('installer tests', () => {
           await dotnetInstaller.installDotnet();
 
           const scriptArguments = (
-            getExecOutputSpy.mock.calls[0][1] as string[]
+            getExecOutputSpy.mock.calls[1][1] as string[]
           ).join(' ');
           const expectedArgument = IS_WINDOWS
             ? `-Channel 6.0`
