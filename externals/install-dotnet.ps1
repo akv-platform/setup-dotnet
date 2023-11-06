@@ -1317,7 +1317,7 @@ if (-not $DownloadSucceeded) {
     throw "Could not find `"$assetName`" with version = $($DownloadLinks[0].effectiveVersion)`nRefer to: https://aka.ms/dotnet-os-lifecycle for information on .NET support"
 }
 
-Say "Extracting the archive."
+Say "Extracting the archive. ZipPath $ZipPath -OutPath $InstallRoot"
 Measure-Action "Package extraction" { Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $InstallRoot }
 
 #  Check if the SDK version is installed; if not, fail the installation.
