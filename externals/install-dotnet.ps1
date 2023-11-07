@@ -874,15 +874,13 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
 # Workaround for slow installation on Windows with network attached C: drive
 # see https://github.com/actions/setup-dotnet/issues/260
 function Extract-Dotnet-Package-D-Drive([string]$ZipPath, [string]$OutPath) {
-    $IsLike = $OutPath -like "C:*"
-    $TestPath = Test-Path D:
-    $IsLikeAndTestPath = $IsLike -and $TestPath
-    Say "Extract-Dotnet-Package-D-Drive: IsLike=$IsLike, TestPath=$TestPath, IsLikeAndTestPath=$IsLikeAndTestPath"
     if ( ( $OutPath -like "C:*" ) -and (Test-Path D:)) {
         Say "Extracting to D: drive, see https://github.com/actions/setup-dotnet/issues/260"
         $OutPathD = $OutPath -replace "^[Cc]:", "D:"
         Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPathD
         Say "Create a junction(soft link) from $OutPath to $OutPathD"
+        dir $OutPathD
+        dir $OutPath
         New-Item -ItemType Junction -Path $OutPath -Target $OutPathD
     } else {
         Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPath
