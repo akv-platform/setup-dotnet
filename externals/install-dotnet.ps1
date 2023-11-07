@@ -878,9 +878,9 @@ function Extract-Dotnet-Package-D-Drive([string]$ZipPath, [string]$OutPath) {
         Say "Extracting to D: drive, see https://github.com/actions/setup-dotnet/issues/260"
         $OutPathD = $OutPath -replace "^[Cc]:", "D:"
         Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPathD
-        Say "Create a junction(soft link) from $OutPath to $OutPathD"
         dir $OutPathD
         dir $OutPath
+        Say "Create a junction(soft link) from $OutPath to $OutPathD"
         New-Item -ItemType Junction -Path $OutPath -Target $OutPathD
     } else {
         Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPath
