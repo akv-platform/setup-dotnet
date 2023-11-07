@@ -871,6 +871,19 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
     }
 }
 
+# Workaround for slow installation on Windows with network attached C: drive
+function Extract-Dotnet-Package-D-Drive([string]$ZipPath, [string]$OutPath) {
+    if ( ( $OutPath -like "D:*" ) -and (Test-Path D:)) {
+        Say "Extracting to D: drive, see https://github.com/actions/setup-dotnet/issues/260"
+        $OutPathD = $OutPath -replace "^[Cc]:", "D:"
+        Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPathD
+        Say "Create a junction(soft link) from $OutPath to $OutPathD"
+        New-Item -ItemType Junction -Path $OutPath -Target $OutPathD
+    } else {
+        Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPath
+    }
+}
+
 function DownloadFile($Source, [string]$OutPath) {
     if ($Source -notlike "http*") {
         #  Using System.IO.Path.GetFullPath to get the current directory
@@ -1318,7 +1331,7 @@ if (-not $DownloadSucceeded) {
 }
 
 Say "Extracting the archive. ZipPath $ZipPath -OutPath $InstallRoot"
-Measure-Action "Package extraction" { Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $InstallRoot }
+Measure-Action "Package extraction" { Extract-Dotnet-Package-D-Drive -ZipPath $ZipPath -OutPath $InstallRoot }
 
 #  Check if the SDK version is installed; if not, fail the installation.
 $isAssetInstalled = $false
