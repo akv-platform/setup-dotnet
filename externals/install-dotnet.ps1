@@ -836,7 +836,7 @@ function Get-List-Of-Directories-And-Versions-To-Unpack-From-Dotnet-Package([Sys
 #            ...
 #       def\ghi\1.0.1\  # directory contains version and does not exist locally
 #           ...         # extract content
-function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
+function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath, [string]$LinkSrcPath) {
     Say-Invocation $MyInvocation
 
     Load-Assembly -Assembly System.IO.Compression.FileSystem
@@ -859,6 +859,16 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
                     New-Item -ItemType Directory -Force -Path $DestinationDir #| Out-Null
                     Say "Extracting file $entry to $DestinationPath"
                     [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $DestinationPath, $OverrideNonVersionedFiles)
+
+                    if ($LinkSrcPath -ne "") {
+                        $LinkFilePath = $DestinationPath.Replace($OutPath, $LinkSrcPath)
+                        Say "Create a junction(soft link) from $LinkFilePath to $DestinationPath"
+                        $LinkDir = Split-Path -Parent $LinkFilePath
+                        if (-Not (Test-Path $LinkDir)) {
+                            New-Item -ItemType Directory -Force -Path $LinkDir #| Out-Null
+                        }
+                        New-Item -ItemType SymbolicLink -Path $LinkFilePath -Target $DestinationPath -Force
+                    }
                 }
             }
         }
@@ -881,16 +891,7 @@ function Extract-Dotnet-Package-D-Drive([string]$ZipPath, [string]$OutPath) {
     if (($OutPath -like "C:*") -and (Test-Path D:)) {
         Say "Extracting to D: drive, see https://github.com/actions/setup-dotnet/issues/260"
         $OutPathD = $OutPath -replace "^[Cc]:", "D:"
-        if (-Not (Test-Path $OutPathD -PathType Container)) {
-            New-Item -ItemType Directory -Force -Path $OutPathD
-        }
-        Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPathD
-        Say "Create a junction(soft link) from $OutPath to $OutPathD"
-        Say "Get-ChildItem $OutPathD"
-        Get-ChildItem $OutPathD
-        Say "Get-ChildItem $OutPath"
-        Get-ChildItem $OutPath
-        New-Item -ItemType Junction -Path $OutPath -Target $OutPathD
+        Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPathD -LinkSrcPath $OutPath
     } else {
         Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPath
     }
