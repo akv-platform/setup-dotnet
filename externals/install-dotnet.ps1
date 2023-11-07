@@ -845,15 +845,19 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
         $Zip = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
 
         $DirectoriesToUnpack = Get-List-Of-Directories-And-Versions-To-Unpack-From-Dotnet-Package -Zip $Zip -OutPath $OutPath
+        Say "Directories to unpack: $DirectoriesToUnpack"
 
         foreach ($entry in $Zip.Entries) {
+            Say "Entry: $entry.FullName"
             $PathWithVersion = Get-Path-Prefix-With-Version $entry.FullName
             if (($null -eq $PathWithVersion) -Or ($DirectoriesToUnpack -contains $PathWithVersion)) {
                 $DestinationPath = Get-Absolute-Path $(Join-Path -Path $OutPath -ChildPath $entry.FullName)
                 $DestinationDir = Split-Path -Parent $DestinationPath
+                Say "DestinationPath = $DestinationPath, DestinationDir = $DestinationDir"
                 $OverrideFiles=$OverrideNonVersionedFiles -Or (-Not (Test-Path $DestinationPath))
                 if ((-Not $DestinationPath.EndsWith("\")) -And $OverrideFiles) {
-                    New-Item -ItemType Directory -Force -Path $DestinationDir | Out-Null
+                    New-Item -ItemType Directory -Force -Path $DestinationDir #| Out-Null
+                    Say "Extracting file $entry to $DestinationPath"
                     [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $DestinationPath, $OverrideNonVersionedFiles)
                 }
             }
