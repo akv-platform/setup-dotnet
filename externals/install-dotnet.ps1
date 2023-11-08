@@ -1317,8 +1317,26 @@ if (-not $DownloadSucceeded) {
     throw "Could not find `"$assetName`" with version = $($DownloadLinks[0].effectiveVersion)`nRefer to: https://aka.ms/dotnet-os-lifecycle for information on .NET support"
 }
 
+# Workaround for slow installation on Windows with network attached C: drive
+# see https://github.com/actions/setup-dotnet/issues/260
+function Extract-Dotnet-Package-D-Drive([string]$ZipPath, [string]$OutPath) {
+    if (($OutPath -like "C:*") -and (Test-Path D:)) {
+        Say "Extracting to D: drive, see https://github.com/actions/setup-dotnet/issues/260"
+        $OutPathD = $OutPath -replace "^[Cc]:", "D:"
+        Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPathD
+
+        Say "Create a junction(soft link) from $OutPath to $OutPathD"
+        # if (Test-Path $OutPath) {
+        #    Remove-Item $OutPath -Force -Recurse
+        #}
+        New-Item -ItemType Junction -Path $OutPath -Target $OutPathD -Force
+    } else {
+        Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPath
+    }
+}
+
 Say "Extracting the archive."
-Measure-Action "Package extraction" { Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $InstallRoot }
+Measure-Action "Package extraction" { Extract-Dotnet-Package-D-Drive -ZipPath $ZipPath -OutPath $InstallRoot }
 
 #  Check if the SDK version is installed; if not, fail the installation.
 $isAssetInstalled = $false
