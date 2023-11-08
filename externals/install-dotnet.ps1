@@ -1326,10 +1326,10 @@ function Extract-Dotnet-Package-D-Drive([string]$ZipPath, [string]$OutPath) {
         Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPathD
 
         Say "Create a junction(soft link) from $OutPath to $OutPathD"
-        # if (Test-Path $OutPath) {
-        #    Remove-Item $OutPath -Force -Recurse
-        #}
-        New-Item -ItemType Junction -Path $OutPath -Target $OutPathD -Force
+        if (Test-Path $OutPath) {
+            Remove-Item $OutPath -Force -Recurse
+        }
+        New-Item -ItemType Junction -Path $OutPath -Target $OutPathD
     } else {
         Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $OutPath
     }
